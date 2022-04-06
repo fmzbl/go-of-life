@@ -3,28 +3,31 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
 type cell struct {
-	x int
-	y int
-	alive bool
+	x               int
+	y               int
+	alive           bool
 	nextAliveStatus bool
 }
 
 type game struct {
-	rows int
-	cols int
+	rows        int
+	cols        int
 	cellsMatrix [][]*cell
 }
 
 func (game *game) genRandomState() {
 	// Generate a random alive value for every cell
-	for row, _ := range game.cellsMatrix {
-		for _, cell := range game.cellsMatrix[row] {			
+	for row := range game.cellsMatrix {
+		for _, cell := range game.cellsMatrix[row] {
 			rand.Seed(time.Now().UnixNano())
-			cell.alive = rand.Intn(7) == 1
+			cell.alive = rand.Intn(8) == 1
 		}
 	}
 }
@@ -34,7 +37,7 @@ func (game *game) getAliveCellNeighbors(cell *cell) int {
 	var aliveNeighbors int
 	around := [8][2]int{{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}}
 
-	for _, positions := range around {		
+	for _, positions := range around {
 		x := cell.x + positions[1]
 		y := cell.y + positions[0]
 
@@ -50,20 +53,29 @@ func (game *game) getAliveCellNeighbors(cell *cell) int {
 	return aliveNeighbors
 }
 
-func (game *game) nextGeneration() {
+func (game *game) NextGeneration() {
 	// Calculate the next generation of the game following the 4 Conway's Game of Life rules
-	for row, _ := range game.cellsMatrix {
+	for row := range game.cellsMatrix {
 		for _, cell := range game.cellsMatrix[row] {
 			aliveNeighbors := game.getAliveCellNeighbors(cell)
-			
-			if (cell.alive && aliveNeighbors <= 2) {cell.nextAliveStatus = false}
-			if (cell.alive && aliveNeighbors > 3) {cell.nextAliveStatus = false}
-			if (cell.alive && (aliveNeighbors == 2 || aliveNeighbors == 3)) {cell.nextAliveStatus = true}
-			if (!cell.alive && aliveNeighbors == 3) {cell.nextAliveStatus = true}
+
+			if cell.alive && aliveNeighbors <= 2 {
+				cell.nextAliveStatus = false
+			}
+			if cell.alive && aliveNeighbors > 3 {
+				cell.nextAliveStatus = false
+			}
+			if cell.alive && (aliveNeighbors == 2 || aliveNeighbors == 3) {
+				cell.nextAliveStatus = true
+			}
+			if !cell.alive && aliveNeighbors == 3 {
+				cell.nextAliveStatus = true
+			}
 		}
 	}
 
-	for row, _ := range game.cellsMatrix {
+	// TODO: This is probably bad, look for a better and optimized way
+	for row := range game.cellsMatrix {
 		for _, cell := range game.cellsMatrix[row] {
 			cell.alive = cell.nextAliveStatus
 		}
@@ -90,35 +102,53 @@ func NewGame(rows int, cols int) *game {
 	return &game
 }
 
-
-func (cell *cell) setIsAive(newState bool) {
-	cell.alive = newState
-}
-
 func renderGame(game *game) {
-	// Prints the char if the cell is alive
-	for row, _ := range game.cellsMatrix {
+	// Prints a char if the cell is alive
+	var renderString strings.Builder
+
+	for row := range game.cellsMatrix {
 		for _, cell := range game.cellsMatrix[row] {
 			if cell.alive {
-				fmt.Printf("#")  
+				renderString.WriteString("#")
 			} else {
-				fmt.Printf(" ")  
+				renderString.WriteString(" ")
 			}
 		}
-		fmt.Printf("\n")  
+		renderString.WriteString("\n")
 	}
+
+	fmt.Printf("%s", renderString.String())
 }
 
 func main() {
-	rows := 30
-	cols := 50
+	var err error
+
+	var cols int
+	var rows int
+
+	// Validate and use of args for setting cols and rows
+	if len(os.Args) == 3 {
+		cols, err = strconv.Atoi(os.Args[1])
+		if err != nil {
+			panic("Invalid arguments")
+		}
+
+		rows, err = strconv.Atoi(os.Args[2])
+		if err != nil {
+			panic("Invalid arguments")
+		}
+	} else {
+		cols = 50
+		rows = 20
+	}
 
 	game := NewGame(rows, cols)
 
+	// Game loop
 	for {
 		fmt.Print("\033[H\033[2J")
 		renderGame(game)
-		game.nextGeneration()
-		time.Sleep(1000 * time.Millisecond)
-	} 
+		game.NextGeneration()
+		time.Sleep(100 * time.Millisecond)
+	}
 }
