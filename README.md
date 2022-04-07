@@ -4,7 +4,7 @@ An ASCII based [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_
 
 ## How to use
 
-Run the main file, you can pass it the with and height if you wish
+Run the main file, you can pass it the width and height if you wish
 
 ```sh
 $ go run main.go width height 
