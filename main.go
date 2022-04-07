@@ -144,7 +144,7 @@ func main() {
 
 	game := NewGame(rows, cols)
 
-	// Game loop
+	// Loop
 	for {
 		fmt.Print("\033[H\033[2J")
 		renderGame(game)
