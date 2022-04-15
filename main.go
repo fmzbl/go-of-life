@@ -126,7 +126,7 @@ func main() {
 	var cols int
 	var rows int
 
-	// Validate and use of args for setting cols and rows
+	// Validate and use args for setting cols and rows
 	if len(os.Args) == 3 {
 		cols, err = strconv.Atoi(os.Args[1])
 		if err != nil {
