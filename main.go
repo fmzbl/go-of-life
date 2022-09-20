@@ -109,9 +109,9 @@ func renderGame(game *game) {
 	for row := range game.cellsMatrix {
 		for _, cell := range game.cellsMatrix[row] {
 			if cell.alive {
-				renderString.WriteString("#")
+				renderString.WriteString("██")
 			} else {
-				renderString.WriteString(" ")
+				renderString.WriteString("  ")
 			}
 		}
 		renderString.WriteString("\n")
